@@ -242,7 +242,7 @@ const fetchAllEntriesForContentType = async (
     }
 };
 
-function validateTranslation(original: any, translated: any): boolean {
+function validateTranslation(original: unknown, translated: unknown): boolean {
     // First check if both values are valid strings
     if (typeof original !== 'string' || typeof translated !== 'string') {
         return false;

@@ -219,14 +219,15 @@ async function applyTranslationsToContentful(
       await client.entry.publish({ spaceId, environmentId, entryId }, updated);
 
       console.log(`🚀 Updated and published entry: ${entryId}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Catch missing or deleted entries
-      if (error.name === 'NotFound' || error.message?.includes('not exist')) {
+      const err = error as { name?: string; message?: string };
+      if (err.name === 'NotFound' || err.message?.includes('not exist')) {
         console.warn(`⚠️ Entry not found: ${entryId}, skipping...`);
         continue;
       }
       // Catch permission or API-related issues
-      console.error(`❌ Error updating entry ${entryId}: ${error.message}`);
+      console.error(`❌ Error updating entry ${entryId}: ${err.message}`);
       continue;
     }
   }

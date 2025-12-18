@@ -140,7 +140,6 @@ export async function POST(request: Request) {
         }
         // --- STRICT MAPPING AND LOGGING ---
         const stringEntries = translationEntries.filter(entry => entry.fieldType !== 'RichText');
-        const richTextEntries = translationEntries.filter(entry => entry.fieldType === 'RichText');
         const textsToTranslate = stringEntries.map(e => e.sourceValue);
         let translatedTexts: string[] = [];
         if (textsToTranslate.length > 0) {
