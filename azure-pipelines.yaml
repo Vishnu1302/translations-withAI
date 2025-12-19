@@ -1,33 +1,50 @@
 trigger:
-  - main
+  branches:
+    include:
+      - main
 
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  NODE_VERSION: '20.x'
+  BUILD_DIR: 'next-build'
+
 steps:
+  # 1️⃣ Checkout code
+  - checkout: self
+    clean: true
+
+  # 2️⃣ Setup Node.js
   - task: NodeTool@0
     inputs:
-      versionSpec: '18.x'
+      versionSpec: $(NODE_VERSION)
     displayName: 'Install Node.js'
 
-  - script: npm i
+  # 3️⃣ Install dependencies
+  - script: |
+      npm install
     displayName: 'Install dependencies'
 
-  - script: npm run build
-    displayName: 'Build Next.js application'
+  # 4️⃣ Build Next.js
+  - script: |
+      npm run build
+    displayName: 'Build Next.js app'
 
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      replaceExistingArchive: true
-    displayName: 'Archive application files'
+  # 5️⃣ Prepare artifact folder
+  - script: |
+      mkdir $(BUILD_DIR)
+      cp -R .next $(BUILD_DIR)/
+      cp -R public $(BUILD_DIR)/
+      cp package.json $(BUILD_DIR)/
+      cp package-lock.json $(BUILD_DIR)/ || true
+      cp next.config.js $(BUILD_DIR)/ || true
+    displayName: 'Prepare build artifacts'
 
+  # 6️⃣ Publish artifact
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'drop'
+      PathtoPublish: '$(BUILD_DIR)'
+      ArtifactName: 'nextjs-app'
       publishLocation: 'Container'
-    displayName: 'Publish artifacts for deployment'
+    displayName: 'Publish build artifact'
